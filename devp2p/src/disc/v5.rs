@@ -17,7 +17,7 @@ pub struct Discv5 {
 }
 
 impl Discv5 {
-    pub fn new(mut disc: discv5::Discv5, cache: usize) -> Self {
+    pub fn new(disc: discv5::Discv5, cache: usize) -> Self {
         let tasks = TaskGroup::default();
 
         let errors = Arc::new(UnbufferedChannel::new());

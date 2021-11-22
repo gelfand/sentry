@@ -21,7 +21,7 @@ cidr = "0.2"
 derive_more = "0.99"
 digest = "0.9"
 discv4 = { path = "../discv4", optional = true }
-discv5 = { git = "https://github.com/sigp/discv5", optional = true }
+discv5 = { version = "0.1.0-beta.12", optional = true }
 dnsdisc = { path = "../dnsdisc", default-features = false, optional = true }
 educe = { version = "0.4", default-features = false, features = [
     "Clone",

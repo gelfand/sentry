@@ -354,7 +354,7 @@ dependencies = [
 [[package]]
 name = "console-api"
 version = "0.1.0"
-source = "git+https://github.com/tokio-rs/console#3d80c4b68b97db9c20cb496a2e3df0ccc1336b38"
+source = "git+https://github.com/tokio-rs/console?rev=3d80c4b#3d80c4b68b97db9c20cb496a2e3df0ccc1336b38"
 dependencies = [
  "prost 0.8.0",
  "prost-types",
@@ -366,7 +366,7 @@ dependencies = [
 [[package]]
 name = "console-subscriber"
 version = "0.1.0"
-source = "git+https://github.com/tokio-rs/console#3d80c4b68b97db9c20cb496a2e3df0ccc1336b38"
+source = "git+https://github.com/tokio-rs/console?rev=3d80c4b#3d80c4b68b97db9c20cb496a2e3df0ccc1336b38"
 dependencies = [
  "console-api",
  "futures",
@@ -584,8 +584,9 @@ dependencies = [
 
 [[package]]
 name = "discv5"
-version = "0.1.0-beta.10"
-source = "git+https://github.com/sigp/discv5#10247bbd299227fef20233f2f5a8de9780de09ac"
+version = "0.1.0-beta.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bc48afe57df102ede7f103d56d5f0eedfef4468b08ffaf9bf2ee2bae8160f28"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -813,7 +814,7 @@ dependencies = [
 [[package]]
 name = "ethereum-interfaces"
 version = "0.1.0"
-source = "git+https://github.com/ledgerwatch/interfaces#b9b02cb6a62f8b7e2bb689b148492d0e4ad6d836"
+source = "git+https://github.com/ledgerwatch/interfaces?rev=b9b02cb#b9b02cb6a62f8b7e2bb689b148492d0e4ad6d836"
 dependencies = [
  "arrayref",
  "ethereum-types",

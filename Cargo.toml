@@ -15,11 +15,11 @@ async-trait = "0.1"
 bytes = "1"
 cidr = "0.2"
 clap = "3.0.0-beta.2"
-console-subscriber = { git = "https://github.com/tokio-rs/console" }
+console-subscriber = { git = "https://github.com/tokio-rs/console", rev = "3d80c4b" }
 derive_more = "0.99"
 devp2p = { path = "devp2p", features = ["discv4", "discv5", "dnsdisc"] }
 discv4 = { path = "discv4" }
-discv5 = { git = "https://github.com/sigp/discv5" }
+discv5 = "0.1.0-beta.12"
 dnsdisc = { path = "dnsdisc", features = ["trust-dns"] }
 educe = { version = "0.4", features = ["Debug", "Default"] }
 enr = { version = "0.5", default-features = false, features = [
@@ -28,7 +28,7 @@ enr = { version = "0.5", default-features = false, features = [
 enum-primitive-derive = "0.2"
 ethereum = { version = "0.9", default-features = false }
 ethereum-forkid = "0.6"
-ethereum-interfaces = { git = "https://github.com/ledgerwatch/interfaces", features = [
+ethereum-interfaces = { git = "https://github.com/ledgerwatch/interfaces", rev = "b9b02cb", features = [
     "sentry",
 ] }
 ethereum-types = "0.12"
