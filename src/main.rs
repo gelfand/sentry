@@ -189,7 +189,7 @@ impl CapabilityServerImpl {
         self.no_new_peers.store(false, Ordering::SeqCst);
     }
 
-    #[instrument(name = "CapabilityServerImpl.handle_event", skip(self))]
+    #[instrument(name = "CapabilityServerImpl.handle_event", skip(self, event))]
     fn handle_event(
         &self,
         peer: PeerId,
@@ -315,7 +315,8 @@ impl CapabilityServer for CapabilityServerImpl {
             },
         );
     }
-    #[instrument(skip(self, peer, event), level = "debug", fields(peer=&*peer.to_string(), event=&*event.to_string()))]
+
+    #[instrument(skip_all, level = "debug", fields(peer=&*peer.to_string(), event=&*event.to_string()))]
     async fn on_peer_event(&self, peer: PeerId, event: InboundEvent) {
         debug!("Received message");
 
@@ -334,7 +335,6 @@ impl CapabilityServer for CapabilityServerImpl {
         }
     }
 
-    #[instrument(skip(self, peer), level = "debug", fields(peer=&*peer.to_string()))]
     async fn next(&self, peer: PeerId) -> OutboundEvent {
         self.receiver(peer)
             .unwrap()

@@ -142,7 +142,8 @@ impl CapabilityServer for CapabilityServerImpl {
             },
         );
     }
-    #[instrument(skip(self, peer, event), fields(peer=&*peer.to_string(), event=&*event.to_string()))]
+
+    #[instrument(skip_all, fields(peer=&*peer.to_string()))]
     async fn on_peer_event(&self, peer: PeerId, event: InboundEvent) {
         match event {
             InboundEvent::Disconnect { .. } => {
@@ -197,7 +198,8 @@ impl CapabilityServer for CapabilityServerImpl {
             }
         }
     }
-    #[instrument(skip(self, peer), fields(peer=&*peer.to_string()))]
+
+    #[instrument(skip_all, fields(peer=&*peer.to_string()))]
     async fn next(&self, peer: PeerId) -> OutboundEvent {
         let outbound = self
             .get_pipes(peer)

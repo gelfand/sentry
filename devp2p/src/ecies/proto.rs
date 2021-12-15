@@ -68,7 +68,7 @@ impl Decoder for ECIESCodec {
     type Item = IngressECIESValue;
     type Error = io::Error;
 
-    #[instrument(level = "trace", skip(self, buf), fields(peer=&*format!("{:?}", self.ecies.remote_id.map(|s| s.to_string())), state=&*format!("{:?}", self.state)))]
+    #[instrument(level = "trace", skip_all, fields(peer=&*format!("{:?}", self.ecies.remote_id.map(|s| s.to_string())), state=&*format!("{:?}", self.state)))]
     fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         loop {
             match self.state {
@@ -202,7 +202,7 @@ where
     }
 
     /// Listen on a just connected ECIES client
-    #[instrument(skip(transport, secret_key), fields(peer=&*format!("{:?}", transport.remote_addr())))]
+    #[instrument(skip_all, fields(peer=&*format!("{:?}", transport.remote_addr())))]
     pub async fn incoming(transport: Io, secret_key: SecretKey) -> anyhow::Result<Self> {
         let ecies = ECIESCodec::new_server(secret_key).context("handshake error")?;
 

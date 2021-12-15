@@ -156,10 +156,6 @@ where
     }
 
     /// Connect to a peer over TCP
-    #[instrument(
-        skip(transport, secret_key, client_version, capabilities, port, remote_id),
-        fields()
-    )]
     pub async fn connect(
         transport: Io,
         secret_key: SecretKey,
@@ -179,10 +175,6 @@ where
     }
 
     /// Incoming peer stream over TCP
-    #[instrument(
-        skip(transport, secret_key, client_version, capabilities, port),
-        fields()
-    )]
     pub async fn incoming(
         transport: Io,
         secret_key: SecretKey,
@@ -201,7 +193,7 @@ where
     }
 
     /// Create a new peer stream
-    #[instrument(skip(transport, secret_key, client_version, capabilities, port), fields(id=&*transport.remote_id().to_string()))]
+    #[instrument(skip_all, fields(id=&*transport.remote_id().to_string()))]
     pub async fn new(
         mut transport: ECIESStream<Io>,
         secret_key: SecretKey,

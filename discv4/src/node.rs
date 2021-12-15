@@ -668,12 +668,10 @@ impl Node {
         Ok(this)
     }
 
-    #[instrument(skip(self), fields(self=&*self.id.to_string()))]
     async fn lookup_self(&self) -> Vec<NodeRecord> {
         self.lookup_inner(self.id).await
     }
 
-    #[instrument(skip(self, target), fields(target=&*target.to_string()))]
     pub async fn lookup(&self, target: NodeId) -> Vec<NodeRecord> {
         self.lookup_inner(target).await
     }

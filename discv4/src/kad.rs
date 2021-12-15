@@ -117,7 +117,7 @@ impl Table {
     }
 
     /// Add verified node if there is space.
-    #[instrument(skip(self, node), fields(node = &*node.id.to_string()))]
+    #[instrument(skip_all, fields(node = &*node.id.to_string()))]
     pub fn add_verified(&mut self, node: NodeRecord) {
         trace!("Adding peer");
         if node.address.is_ipv6() {
@@ -141,7 +141,7 @@ impl Table {
     }
 
     /// Add seen node if there is space.
-    #[instrument(skip(self, node), fields(node = &*node.id.to_string()))]
+    #[instrument(skip_all, fields(node = &*node.id.to_string()))]
     pub fn add_seen(&mut self, node: NodeRecord) {
         trace!("Adding peer");
         if node.address.is_ipv6() {
@@ -165,7 +165,7 @@ impl Table {
     }
 
     /// Remove node from the bucket
-    #[instrument(skip(self, node), fields(node = &*node.to_string()))]
+    #[instrument(skip_all, fields(node = &*node.to_string()))]
     pub fn remove(&mut self, node: NodeId) {
         if let Some(bucket) = self.bucket_mut(node) {
             if bucket.replacements.is_empty() {
