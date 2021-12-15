@@ -9,7 +9,7 @@ use crate::{
 use anyhow::{anyhow, Context};
 use async_stream::stream;
 use async_trait::async_trait;
-use clap::Clap;
+use clap::Parser;
 use devp2p::*;
 use educe::Educe;
 use futures::stream::BoxStream;

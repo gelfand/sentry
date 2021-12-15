@@ -14,7 +14,7 @@ async-stream = "0.3"
 async-trait = "0.1"
 bytes = "1"
 cidr = "0.2"
-clap = "3.0.0-beta.2"
+clap = { version = "3.0.0-rc.4", features = ["derive", "env"] }
 console-subscriber = { git = "https://github.com/tokio-rs/console", rev = "3d80c4b" }
 derive_more = "0.99"
 devp2p = { path = "devp2p", features = ["discv4", "discv5", "dnsdisc"] }

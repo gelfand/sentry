@@ -1,5 +1,4 @@
 use cidr::IpCidr;
-use clap::Clap;
 use derive_more::FromStr;
 use devp2p::NodeRecord;
 use educe::Educe;
@@ -16,7 +15,7 @@ pub const BOOTNODES: &[&str] = &[
 	"enode://5d6d7cd20d6da4bb83a1d28cadb5d409b64edf314c0335df658c1a54e32c7c4a7ab7823d57c39b6a757556e68ff1df17c748b698544a55cb488b52479a92b60f@104.42.217.25:30303",   // bootnode-azure-westus-001
 ];
 
-#[derive(Educe, Clap)]
+#[derive(Educe, clap::StructOpt)]
 #[clap(
     name = "ethereum-sentry",
     about = "Service that listens to Ethereum's P2P network, serves information to other nodes, and provides gRPC interface to clients to interact with the network."
