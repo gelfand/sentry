@@ -41,11 +41,11 @@ pub struct FullStatusData {
     pub fork_filter: ForkFilter,
 }
 
-impl TryFrom<crate::grpc::sentry::StatusData> for FullStatusData {
+impl TryFrom<ethereum_interfaces::sentry::StatusData> for FullStatusData {
     type Error = anyhow::Error;
 
-    fn try_from(value: crate::grpc::sentry::StatusData) -> Result<Self, Self::Error> {
-        let crate::grpc::sentry::StatusData {
+    fn try_from(value: ethereum_interfaces::sentry::StatusData) -> Result<Self, Self::Error> {
+        let ethereum_interfaces::sentry::StatusData {
             network_id,
             total_difficulty,
             best_hash,

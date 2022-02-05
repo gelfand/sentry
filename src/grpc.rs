@@ -1,8 +1,7 @@
 use crate::eth::{EthMessageId, EthProtocolVersion};
 use anyhow::bail;
+use ethereum_interfaces::sentry;
 use std::convert::TryFrom;
-
-pub use ethereum_interfaces::sentry;
 
 impl From<EthMessageId> for sentry::MessageId {
     fn from(id: EthMessageId) -> Self {

@@ -15,7 +15,6 @@ async-trait = "0.1"
 bytes = "1"
 cidr = "0.2"
 clap = { version = "3.0.0-rc.4", features = ["derive", "env"] }
-console-subscriber = { git = "https://github.com/tokio-rs/console", rev = "bbce8e7" }
 derive_more = "0.99"
 devp2p = { path = "devp2p", features = ["discv4", "discv5", "dnsdisc"] }
 discv4 = { path = "discv4" }
@@ -26,19 +25,18 @@ enr = { version = "0.5", default-features = false, features = [
     "rust-secp256k1",
 ] }
 enum-primitive-derive = "0.2"
-ethereum = { version = "0.9", default-features = false }
-ethereum-forkid = "0.6"
-ethereum-interfaces = { git = "https://github.com/ledgerwatch/interfaces", rev = "5472b13", features = [
+ethereum-forkid = "0.7"
+ethereum-interfaces = { git = "https://github.com/ledgerwatch/interfaces", branch = "akula", features = [
     "sentry",
 ] }
-ethereum-types = "0.12"
+ethereum-types = "0.13"
 futures = "0.3"
 hex = "0.4"
 hex-literal = "0.3"
 k256 = { version = "0.8", features = ["ecdsa"] }
 maplit = "1"
 num-traits = "0.2"
-parking_lot = "0.11"
+parking_lot = "0.12"
 plain_hasher = "0.2"
 prost = "0.9"
 rlp = "0.5"

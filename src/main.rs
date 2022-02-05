@@ -1,19 +1,14 @@
 #![allow(dead_code, clippy::upper_case_acronyms)]
 
-use crate::{
-    config::*,
-    eth::*,
-    grpc::sentry::{sentry_server::SentryServer, InboundMessage, PeersReply},
-    services::*,
-};
+use crate::{config::*, eth::*, services::*};
 use anyhow::{anyhow, Context};
 use async_stream::stream;
 use async_trait::async_trait;
 use clap::Parser;
 use devp2p::*;
 use educe::Educe;
+use ethereum_interfaces::sentry::{self, sentry_server::SentryServer, InboundMessage, PeersReply};
 use futures::stream::BoxStream;
-use grpc::sentry;
 use maplit::btreemap;
 use num_traits::{FromPrimitive, ToPrimitive};
 use parking_lot::RwLock;
@@ -167,10 +162,12 @@ impl CapabilityServerImpl {
         block_tracker.remove_peer(peer);
         valid_peers.remove(&peer);
 
-        let send_status_result = self.peers_status_sender.send(grpc::sentry::PeersReply {
-            peer_id: Some(ethereum_interfaces::types::H512::from(peer)),
-            event: grpc::sentry::peers_reply::PeerEvent::Disconnect as i32,
-        });
+        let send_status_result =
+            self.peers_status_sender
+                .send(ethereum_interfaces::sentry::PeersReply {
+                    peer_id: Some(ethereum_interfaces::types::H512::from(peer)),
+                    event: ethereum_interfaces::sentry::peers_reply::PeerEvent::Disconnect as i32,
+                });
         if send_status_result.is_err() {
             debug!("No subscribers to report peer status to");
         }
@@ -231,9 +228,12 @@ impl CapabilityServerImpl {
                             valid_peers.insert(peer);
 
                             let send_status_result =
-                                self.peers_status_sender.send(grpc::sentry::PeersReply {
+                                self.peers_status_sender
+                                    .send(ethereum_interfaces::sentry::PeersReply {
                                     peer_id: Some(ethereum_interfaces::types::H512::from(peer)),
-                                    event: grpc::sentry::peers_reply::PeerEvent::Connect as i32,
+                                    event:
+                                        ethereum_interfaces::sentry::peers_reply::PeerEvent::Connect
+                                            as i32,
                                 });
                             if send_status_result.is_err() {
                                 debug!("No subscribers to report peer status to");
@@ -484,20 +484,10 @@ async fn main() -> anyhow::Result<()> {
     } else {
         EnvFilter::from_default_env()
     };
-    let registry = tracing_subscriber::registry()
-        // the `TasksLayer` can be used in combination with other `tracing` layers...
-        .with(tracing_subscriber::fmt::layer());
-
-    if opts.tokio_console {
-        let (layer, server) = console_subscriber::TasksLayer::new();
-        registry
-            .with(filter.add_directive("tokio=trace".parse()?))
-            .with(layer)
-            .init();
-        tokio::spawn(async move { server.serve().await.expect("server failed") });
-    } else {
-        registry.with(filter).init();
-    }
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(filter)
+        .init();
 
     let secret_key;
     if let Some(data) = opts.node_key {
