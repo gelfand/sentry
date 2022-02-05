@@ -14,7 +14,7 @@ struct DummyServer;
 
 #[async_trait]
 impl CapabilityServer for DummyServer {
-    fn on_peer_connect(&self, peer: PeerId, _: HashMap<CapabilityName, CapabilityVersion>) {
+    fn on_peer_connect(&self, _peer: PeerId, _: HashMap<CapabilityName, CapabilityVersion>) {
         info!("Peer connected")
     }
 

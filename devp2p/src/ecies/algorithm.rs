@@ -76,7 +76,9 @@ pub struct ECIES {
     nonce: H256,
     remote_nonce: Option<H256>,
 
+    #[educe(Debug(ignore))]
     ingress_aes: Option<Aes256Ctr>,
+    #[educe(Debug(ignore))]
     egress_aes: Option<Aes256Ctr>,
     ingress_mac: Option<MAC>,
     egress_mac: Option<MAC>,

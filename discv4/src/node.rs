@@ -17,7 +17,7 @@ use sha3::{Digest, Keccak256};
 use std::{
     collections::{btree_map, hash_map, BTreeMap, HashMap},
     convert::TryFrom,
-    net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4},
+    net::{IpAddr, SocketAddr},
     str::FromStr,
     sync::Arc,
     time::Duration,
@@ -101,9 +101,9 @@ impl FromStr for NodeRecord {
         let address = match url.host() {
             Some(Host::Ipv4(ip)) => IpAddr::V4(ip),
             Some(Host::Ipv6(ip)) => IpAddr::V6(ip),
-            Some(Host::Domain(ip)) => IpAddr::V4(
-                Ipv4Addr::from_str(ip).map_err(|e| NodeRecordParseError::InvalidUrl(e.into()))?,
-            ),
+            Some(Host::Domain(ip)) => {
+                IpAddr::from_str(ip).map_err(|e| NodeRecordParseError::InvalidUrl(e.into()))?
+            }
             other => {
                 return Err(NodeRecordParseError::InvalidUrl(anyhow!(
                     "invalid host: {:?}",
@@ -214,15 +214,15 @@ enum PostSendTrigger {
 
 impl Node {
     pub async fn new(
-        addr: SocketAddrV4,
+        addr: SocketAddr,
         secret_key: SecretKey,
         bootstrap_nodes: Vec<NodeRecord>,
-        public_address: Option<Ipv4Addr>,
+        public_address: Option<IpAddr>,
         enable_upnp: bool,
         tcp_port: u16,
     ) -> anyhow::Result<Arc<Self>> {
         let node_endpoint = Arc::new(RwLock::new(Endpoint {
-            address: public_address.unwrap_or_else(|| *addr.ip()).into(),
+            address: public_address.unwrap_or_else(|| addr.ip()),
             udp_port: addr.port(),
             tcp_port,
         }));
@@ -246,7 +246,7 @@ impl Node {
                         {
                             Ok(v) => {
                                 debug!("Discovered public IP: {}", v);
-                                node_endpoint.write().address = v.into();
+                                node_endpoint.write().address = v;
                             }
                             Err(e) => {
                                 debug!("Failed to get public IP: {}", e);

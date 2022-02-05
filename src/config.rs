@@ -29,7 +29,7 @@ pub struct Opts {
     pub listen_port: u16,
     #[clap(long, env)]
     pub cidr: Option<IpCidr>,
-    #[clap(long, env, default_value = "0.0.0.0:8000")]
+    #[clap(long, env, default_value = "127.0.0.1:8000")]
     pub sentry_addr: String,
     #[clap(long, env, default_value = "all.mainnet.ethdisco.net")]
     pub dnsdisc_address: String,
