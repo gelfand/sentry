@@ -5,7 +5,7 @@ license = "Apache-2.0"
 authors = ["Artem Vorotnikov <artem@vorotnikov.me>", "Wei Tang <hi@that.world>"]
 description = "Ethereum's devp2p protocol suite implementation in Rust."
 repository = "https://github.com/rust-ethereum/devp2p"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 aes = { version = "0.7", features = ["ctr"] }

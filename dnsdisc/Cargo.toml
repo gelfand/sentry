@@ -2,7 +2,7 @@
 name = "dnsdisc"
 version = "0.1.0"
 authors = ["Artem Vorotnikov <artem@vorotnikov.me>"]
-edition = "2018"
+edition = "2021"
 description = "Ethereum's Node Discovery via DNS (EIP-1459)"
 license = "Apache-2.0"
 

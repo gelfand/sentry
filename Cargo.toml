@@ -2,7 +2,7 @@
 name = "ethereum-sentry"
 version = "0.1.0"
 authors = ["Artem Vorotnikov <artem@vorotnikov.me>"]
-edition = "2018"
+edition = "2021"
 description = "Sentry that connects to Ethereum network"
 license = "Apache-2.0"
 publish = false
