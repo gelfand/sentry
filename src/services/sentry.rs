@@ -1,11 +1,14 @@
 use crate::{eth::*, CapabilityServerImpl};
 use async_trait::async_trait;
 use devp2p::*;
-use ethereum_interfaces::sentry::{
-    sentry_server::*, HandShakeReply, InboundMessage, MessageId as ProtoMessageId,
-    OutboundMessageData, PeerMinBlockRequest, PeersReply, PeersRequest, SentPeers, SetStatusReply,
+use ethereum_interfaces::{
+    sentry::{
+        sentry_server::*, HandShakeReply, InboundMessage, MessageId as ProtoMessageId,
+        OutboundMessageData, PeerMinBlockRequest, PeersReply, PeersRequest, SentPeers,
+        SetStatusReply,
+    },
+    types::NodeInfoReply,
 };
-use ethereum_interfaces::types::NodeInfoReply;
 use futures::{stream::FuturesUnordered, Stream, TryStreamExt};
 use num_traits::ToPrimitive;
 use secp256k1::rand::seq::IteratorRandom;
