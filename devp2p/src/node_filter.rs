@@ -1,4 +1,4 @@
-use crate::types::PeerId;
+use crate::peer_id::PeerId;
 use std::{
     collections::HashSet,
     fmt::Debug,

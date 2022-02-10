@@ -1,3 +1,4 @@
+use crate::types::SentryPeerId;
 use crate::{eth::*, CapabilityServerImpl};
 use async_trait::async_trait;
 use devp2p::*;
@@ -44,7 +45,7 @@ impl SentryService {
     ) -> SentPeers
     where
         F: FnOnce(&CapabilityServerImpl) -> IT,
-        IT: IntoIterator<Item = PeerId>,
+        IT: IntoIterator<Item = SentryPeerId>,
     {
         let result = self.try_send_by_predicate(request, pred).await;
         result.unwrap_or_else(|error| {
@@ -63,7 +64,7 @@ impl SentryService {
     ) -> anyhow::Result<SentPeers>
     where
         F: FnOnce(&CapabilityServerImpl) -> IT,
-        IT: IntoIterator<Item = PeerId>,
+        IT: IntoIterator<Item = SentryPeerId>,
     {
         let request = request.ok_or_else(|| anyhow::anyhow!("empty request"))?;
 
@@ -94,8 +95,8 @@ impl SentryService {
     async fn send_message(
         &self,
         message: Message,
-        peer: devp2p::PeerId,
-    ) -> anyhow::Result<devp2p::PeerId> {
+        peer: SentryPeerId,
+    ) -> anyhow::Result<SentryPeerId> {
         let sender = self
             .capability_server
             .sender(peer)

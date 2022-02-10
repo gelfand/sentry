@@ -1,5 +1,6 @@
 //! RLPx protocol implementation in Rust
 
+use crate::peer_id::PeerId;
 use crate::{
     disc::Discovery,
     node_filter::{MemoryNodeFilter, NodeFilter},

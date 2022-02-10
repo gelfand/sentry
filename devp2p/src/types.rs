@@ -1,3 +1,4 @@
+use crate::peer_id::PeerId;
 use crate::{peer::DisconnectReason, util::*};
 use arrayvec::ArrayString;
 use async_trait::async_trait;
@@ -5,7 +6,6 @@ use auto_impl::auto_impl;
 use bytes::Bytes;
 use derive_more::Display;
 use educe::Educe;
-pub use ethereum_types::H512 as PeerId;
 use rlp::{DecoderError, Rlp, RlpStream};
 use std::{collections::HashMap, fmt::Debug, net::SocketAddr, str::FromStr};
 

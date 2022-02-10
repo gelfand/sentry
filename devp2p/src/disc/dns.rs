@@ -1,4 +1,5 @@
-use crate::{types::*, util::*};
+use crate::peer_id::peer_id_from_pub_key;
+use crate::types::*;
 use dnsdisc::{Backend, Resolver};
 use secp256k1::{PublicKey, SecretKey};
 use std::{pin::Pin, sync::Arc, time::Duration};
@@ -50,7 +51,7 @@ impl DnsDiscovery {
                                 if tx
                                     .send(Ok(NodeRecord {
                                         addr,
-                                        id: pk2id(&v.public_key()),
+                                        id: peer_id_from_pub_key(&v.public_key()),
                                     }))
                                     .await
                                     .is_err()

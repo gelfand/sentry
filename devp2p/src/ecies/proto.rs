@@ -1,5 +1,6 @@
 use super::algorithm::ECIES;
-use crate::{errors::ECIESError, transport::Transport, types::PeerId};
+use crate::peer_id::PeerId;
+use crate::{errors::ECIESError, transport::Transport};
 use anyhow::{bail, Context as _};
 use bytes::{Bytes, BytesMut};
 use futures::{ready, Sink, SinkExt};

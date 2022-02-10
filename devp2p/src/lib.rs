@@ -14,6 +14,7 @@ mod errors;
 mod mac;
 mod node_filter;
 mod peer;
+pub mod peer_id;
 mod rlpx;
 pub mod transport;
 mod types;
@@ -21,8 +22,9 @@ pub mod util;
 
 pub use disc::*;
 pub use peer::{DisconnectReason, PeerStream};
+pub use peer_id::*;
 pub use rlpx::{ListenOptions, Swarm, SwarmBuilder};
 pub use types::{
     CapabilityId, CapabilityInfo, CapabilityName, CapabilityServer, CapabilityVersion,
-    InboundEvent, Message, NodeRecord, OutboundEvent, PeerId,
+    InboundEvent, Message, NodeRecord, OutboundEvent,
 };

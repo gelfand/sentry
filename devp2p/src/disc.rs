@@ -1,3 +1,4 @@
+use crate::peer_id::PeerId;
 use crate::types::*;
 use async_stream::stream;
 use futures::{stream::BoxStream, StreamExt};

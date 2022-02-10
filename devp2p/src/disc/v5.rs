@@ -1,4 +1,5 @@
-use crate::{types::*, util::*};
+use crate::peer_id::peer_id_from_pub_key;
+use crate::types::*;
 use anyhow::anyhow;
 use async_stream::stream;
 use futures::stream::BoxStream;
@@ -48,7 +49,7 @@ impl Discv5 {
                                                 if tx
                                                     .send(NodeRecord {
                                                         addr: (ip, port).into(),
-                                                        id: pk2id(
+                                                        id: peer_id_from_pub_key(
                                                             &PublicKey::from_slice(&pk.to_bytes())
                                                                 .unwrap(),
                                                         ),
