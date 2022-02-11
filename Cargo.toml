@@ -54,6 +54,7 @@ tracing-futures = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 trust-dns-resolver = "0.20"
 url = "2"
+fdlimit = "0.2"
 
 [dev-dependencies]
 rand = "0.8"
