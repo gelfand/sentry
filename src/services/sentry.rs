@@ -10,7 +10,7 @@ use ethereum_interfaces::{
     },
     types::NodeInfoReply,
 };
-use futures::{stream::FuturesUnordered, Stream, TryStreamExt};
+use futures::{Stream, TryStreamExt};
 use num_traits::ToPrimitive;
 use secp256k1::rand::seq::IteratorRandom;
 use std::{collections::HashSet, convert::TryFrom, pin::Pin, sync::Arc};
@@ -76,18 +76,32 @@ impl SentryService {
             id: eth_id.to_usize().unwrap(),
             data: request.data,
         };
+        let cap = self.capability_server.clone();
+        let mut join_handler = Vec::new();
 
-        let peers = (pred)(&*self.capability_server)
-            .into_iter()
-            .map(|peer| {
-                let message = message.clone();
-                async move { self.send_message(message, peer).await }
-            })
-            .collect::<FuturesUnordered<_>>()
-            .filter_map(|res| res.ok()) // ignore errors
-            .map(|peer_id| peer_id.into())
-            .collect::<Vec<_>>()
-            .await;
+        (pred)(&*cap).into_iter().for_each(|peer| {
+            let message = message.clone();
+            let cap = cap.clone();
+            join_handler.push(tokio::spawn(async move {
+                let sender = cap.sender(peer).unwrap();
+                let outbound_message = OutboundEvent::Message {
+                    capability_name: capability_name(),
+                    message,
+                };
+                match sender.send(outbound_message).await {
+                    Ok(_) => Ok(peer),
+                    Err(error) => Err(anyhow::anyhow!(error)),
+                }
+            }));
+        });
+
+        let mut peers = Vec::new();
+        for task in join_handler {
+            match task.await {
+                Ok(peer) => peers.push(peer.unwrap().into()),
+                _ => continue,
+            }
+        }
 
         Ok(SentPeers { peers })
     }

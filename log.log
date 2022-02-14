@@ -1,0 +1,16 @@
+[2m2022-02-14T14:30:02.995106Z[0m [32m INFO[0m [2methereum_sentry[0m[2m:[0m Loaded node key from config
+[2m2022-02-14T14:30:02.995137Z[0m [32m INFO[0m [2methereum_sentry[0m[2m:[0m Starting Ethereum sentry
+[2m2022-02-14T14:30:03.008858Z[0m [32m INFO[0m [2methereum_sentry[0m[2m:[0m Node ID: 1bb898718fd80f6fb61559945ef80898272e2abb4eeeb7e05345a1d6c0f0df669d0253a38999051fefd77479d0826bd9327181b5f4b3e0b71b5c5d5031560851
+[2m2022-02-14T14:30:03.008894Z[0m [32m INFO[0m [2methereum_sentry[0m[2m:[0m Starting DNS discovery fetch from all.mainnet.ethdisco.net
+[2m2022-02-14T14:30:03.009470Z[0m [32m INFO[0m [2methereum_sentry[0m[2m:[0m Starting discv4 at port 30303
+[2m2022-02-14T14:30:03.009645Z[0m [34mDEBUG[0m [2mtrust_dns_proto::xfer::dns_handle[0m[2m:[0m querying: all.mainnet.ethdisco.net. TXT    
+[2m2022-02-14T14:30:03.009738Z[0m [34mDEBUG[0m [2mtrust_dns_resolver::name_server::name_server_pool[0m[2m:[0m sending request: [Query { name: Name { is_fqdn: true, label_data: [97, 108, 108, 109, 97, 105, 110, 110, 101, 116, 101, 116, 104, 100, 105, 115, 99, 111, 110, 101, 116], label_ends: [3, 10, 18, 21] }, query_type: TXT, query_class: IN }]    
+[2m2022-02-14T14:30:03.009787Z[0m [34mDEBUG[0m [2mtrust_dns_resolver::name_server::name_server[0m[2m:[0m reconnecting: NameServerConfig { socket_addr: 8.8.8.8:53, protocol: Udp, tls_dns_name: None, trust_nx_responses: true }    
+[2m2022-02-14T14:30:03.009815Z[0m [34mDEBUG[0m [2mtrust_dns_proto::xfer[0m[2m:[0m enqueueing message: [Query { name: Name { is_fqdn: true, label_data: [97, 108, 108, 109, 97, 105, 110, 110, 101, 116, 101, 116, 104, 100, 105, 115, 99, 111, 110, 101, 116], label_ends: [3, 10, 18, 21] }, query_type: TXT, query_class: IN }]    
+[2m2022-02-14T14:30:03.009851Z[0m [34mDEBUG[0m [2mtrust_dns_resolver::name_server::name_server[0m[2m:[0m reconnecting: NameServerConfig { socket_addr: 8.8.4.4:53, protocol: Udp, tls_dns_name: None, trust_nx_responses: true }    
+[2m2022-02-14T14:30:03.009879Z[0m [34mDEBUG[0m [2mtrust_dns_proto::xfer[0m[2m:[0m enqueueing message: [Query { name: Name { is_fqdn: true, label_data: [97, 108, 108, 109, 97, 105, 110, 110, 101, 116, 101, 116, 104, 100, 105, 115, 99, 111, 110, 101, 116], label_ends: [3, 10, 18, 21] }, query_type: TXT, query_class: IN }]    
+[2m2022-02-14T14:30:03.010002Z[0m [32m INFO[0m [2methereum_sentry[0m[2m:[0m Using default discv4 bootstrap nodes
+[2m2022-02-14T14:30:03.010015Z[0m [34mDEBUG[0m [2mtrust_dns_proto::udp::udp_stream[0m[2m:[0m created socket successfully    
+[2m2022-02-14T14:30:03.010078Z[0m [34mDEBUG[0m [2migd::aio::search[0m[2m:[0m sending broadcast request to: 239.255.255.250:1900 on interface: Ok(0.0.0.0:65431)    
+[2m2022-02-14T14:30:03.010098Z[0m [34mDEBUG[0m [2mdiscv4::node[0m[2m:[0m Starting node with id: 0x1bb8…0851
+[2m2022-02-14T14:30:03.010254Z[0m [34mDEBUG[0m [2mtrust_dns_proto::udp::udp_stream[0m[2m:[0m created socket successfully    
