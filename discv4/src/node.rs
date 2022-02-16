@@ -3,7 +3,6 @@ use anyhow::{anyhow, bail};
 use bytes::{BufMut, BytesMut};
 use chrono::Utc;
 use futures_util::future::join_all;
-use igd::aio::search_gateway;
 use num_traits::FromPrimitive;
 use parking_lot::{Mutex, RwLock};
 use primitive_types::H256;
@@ -39,13 +38,12 @@ pub type RequestId = u64;
 
 pub const MAX_PACKET_SIZE: usize = 1280;
 
-pub const UPNP_INTERVAL: Duration = Duration::from_secs(60);
-pub const PING_TIMEOUT: Duration = Duration::from_secs(5);
-pub const REFRESH_TIMEOUT: Duration = Duration::from_secs(60);
-pub const PING_INTERVAL: Duration = Duration::from_secs(10);
+pub const PING_TIMEOUT: Duration = Duration::from_secs(10);
+pub const REFRESH_TIMEOUT: Duration = Duration::from_secs(5);
+pub const PING_INTERVAL: Duration = Duration::from_secs(1);
 pub const FIND_NODE_TIMEOUT: Duration = Duration::from_secs(10);
 pub const QUERY_AWAIT_PING_TIME: Duration = Duration::from_secs(2);
-pub const NEIGHBOURS_WAIT_TIMEOUT: Duration = Duration::from_secs(2);
+pub const NEIGHBOURS_WAIT_TIMEOUT: Duration = Duration::from_millis(500);
 
 fn expiry(timeout: Duration) -> u64 {
     u64::try_from(Utc::now().timestamp()).expect("this would predate the protocol inception")
@@ -218,7 +216,6 @@ impl Node {
         secret_key: SecretKey,
         bootstrap_nodes: Vec<NodeRecord>,
         public_address: Option<IpAddr>,
-        enable_upnp: bool,
         tcp_port: u16,
     ) -> anyhow::Result<Arc<Self>> {
         let node_endpoint = Arc::new(RwLock::new(Endpoint {
@@ -228,37 +225,6 @@ impl Node {
         }));
 
         let task_group = Arc::new(TaskGroup::new());
-
-        if enable_upnp {
-            task_group.spawn_with_name("discv4 - UPnP", {
-                let node_endpoint = node_endpoint.clone();
-                async move {
-                    loop {
-                        match async {
-                            Ok::<_, anyhow::Error>(
-                                search_gateway(Default::default())
-                                    .await?
-                                    .get_external_ip()
-                                    .await?,
-                            )
-                        }
-                        .await
-                        {
-                            Ok(v) => {
-                                debug!("Discovered public IP: {}", v);
-                                node_endpoint.write().address = v;
-                            }
-                            Err(e) => {
-                                debug!("Failed to get public IP: {}", e);
-                            }
-                        }
-                        sleep(UPNP_INTERVAL).await;
-                    }
-                }
-                .instrument(span!(Level::TRACE, "UPNP",))
-            });
-        }
-
         let id = pk2id(&PublicKey::from_secret_key(SECP256K1, &secret_key));
 
         debug!("Starting node with id: {}", id);

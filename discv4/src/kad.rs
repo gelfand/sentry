@@ -8,8 +8,8 @@ use std::{
 };
 use tracing::*;
 
-pub const BUCKET_SIZE: usize = 16;
-pub const REPLACEMENTS_SIZE: usize = 16;
+pub const BUCKET_SIZE: usize = 512;
+pub const REPLACEMENTS_SIZE: usize = 512;
 
 const ADDRESS_BYTES_SIZE: usize = 32;
 pub const ADDRESS_BITS: usize = 8 * ADDRESS_BYTES_SIZE;
@@ -208,8 +208,7 @@ impl Table {
     pub fn nearest_node_entries(&self, target: NodeId) -> BTreeMap<H256, NodeRecord> {
         self.kbuckets
             .iter()
-            .map(|bucket| &bucket.bucket)
-            .flatten()
+            .flat_map(|bucket| &bucket.bucket)
             .map(|n| (distance(n.id, target), *n))
             .collect()
     }

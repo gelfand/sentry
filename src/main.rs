@@ -1,14 +1,12 @@
-#![allow(dead_code, clippy::upper_case_acronyms)]
+#![feature(let_chains)]
+#![allow(dead_code, clippy::upper_case_acronyms, incomplete_features)]
 
-use crate::types::sentry_peer_id_from_p2p_peer_id;
-use crate::types::P2PPeerId;
-use crate::types::SentryPeerId;
 use crate::{config::*, eth::*, services::*};
 use anyhow::{anyhow, Context};
 use async_stream::stream;
 use async_trait::async_trait;
 use clap::Parser;
-use devp2p::*;
+use devp2p::{PeerId, PeerIdHash, *};
 use educe::Educe;
 use ethereum_interfaces::sentry::{self, sentry_server::SentryServer, InboundMessage, PeersReply};
 use futures::stream::BoxStream;
@@ -41,6 +39,8 @@ use tracing::*;
 use tracing_subscriber::{prelude::*, EnvFilter};
 use trust_dns_resolver::{config::*, TokioAsyncResolver};
 
+const FRAME_SIZE: u32 = 2097120;
+
 mod config;
 mod eth;
 mod grpc;
@@ -60,12 +60,12 @@ struct Pipes {
 
 #[derive(Clone, Debug, Default)]
 struct BlockTracker {
-    block_by_peer: HashMap<SentryPeerId, u64>,
-    peers_by_block: BTreeMap<u64, HashSet<SentryPeerId>>,
+    block_by_peer: HashMap<devp2p::PeerIdHash, u64>,
+    peers_by_block: BTreeMap<u64, HashSet<devp2p::PeerIdHash>>,
 }
 
 impl BlockTracker {
-    fn set_block_number(&mut self, peer: SentryPeerId, block: u64, force_create: bool) {
+    fn set_block_number(&mut self, peer: devp2p::PeerIdHash, block: u64, force_create: bool) {
         match self.block_by_peer.entry(peer) {
             HashMapEntry::Vacant(e) => {
                 if force_create {
@@ -89,7 +89,7 @@ impl BlockTracker {
         self.peers_by_block.entry(block).or_default().insert(peer);
     }
 
-    fn remove_peer(&mut self, peer: SentryPeerId) {
+    fn remove_peer(&mut self, peer: devp2p::PeerIdHash) {
         if let Some(block) = self.block_by_peer.remove(&peer) {
             if let Entry::Occupied(mut entry) = self.peers_by_block.entry(block) {
                 entry.get_mut().remove(&peer);
@@ -101,11 +101,10 @@ impl BlockTracker {
         }
     }
 
-    fn peers_with_min_block(&self, block: u64) -> HashSet<SentryPeerId> {
+    fn peers_with_min_block(&self, block: u64) -> HashSet<devp2p::PeerIdHash> {
         self.peers_by_block
             .range(block..)
-            .map(|(_, v)| v)
-            .flatten()
+            .flat_map(|(_, v)| v)
             .copied()
             .collect()
     }
@@ -115,21 +114,22 @@ impl BlockTracker {
 #[educe(Debug)]
 pub struct CapabilityServerImpl {
     #[educe(Debug(ignore))]
-    peer_pipes: Arc<RwLock<HashMap<SentryPeerId, Pipes>>>,
+    peer_pipes: Arc<RwLock<HashMap<devp2p::PeerIdHash, Pipes>>>,
     block_tracker: Arc<RwLock<BlockTracker>>,
 
     status_message: Arc<RwLock<Option<FullStatusData>>>,
     protocol_version: EthProtocolVersion,
-    valid_peers: Arc<RwLock<HashSet<SentryPeerId>>>,
+    valid_peers: Arc<RwLock<HashSet<devp2p::PeerIdHash>>>,
 
     data_sender: BroadcastSender<InboundMessage>,
     peers_status_sender: BroadcastSender<PeersReply>,
 
     no_new_peers: Arc<AtomicBool>,
+    peer_id_cache: Arc<RwLock<HashMap<devp2p::PeerId, devp2p::PeerIdHash>>>,
 }
 
 impl CapabilityServerImpl {
-    fn setup_peer(&self, peer: SentryPeerId, p: Pipes) {
+    fn setup_peer(&self, peer: devp2p::PeerIdHash, p: Pipes) {
         let mut pipes = self.peer_pipes.write();
         let mut block_tracker = self.block_tracker.write();
 
@@ -137,18 +137,18 @@ impl CapabilityServerImpl {
         block_tracker.set_block_number(peer, 0, true);
     }
 
-    fn get_pipes(&self, peer: SentryPeerId) -> Option<Pipes> {
+    fn get_pipes(&self, peer: devp2p::PeerIdHash) -> Option<Pipes> {
         self.peer_pipes.read().get(&peer).cloned()
     }
 
-    pub fn sender(&self, peer: SentryPeerId) -> Option<OutboundSender> {
+    pub fn sender(&self, peer: devp2p::PeerIdHash) -> Option<OutboundSender> {
         self.peer_pipes
             .read()
             .get(&peer)
             .map(|pipes| pipes.sender.clone())
     }
 
-    fn receiver(&self, peer: SentryPeerId) -> Option<OutboundReceiver> {
+    fn receiver(&self, peer: devp2p::PeerIdHash) -> Option<OutboundReceiver> {
         self.peer_pipes
             .read()
             .get(&peer)
@@ -156,7 +156,7 @@ impl CapabilityServerImpl {
     }
 
     #[instrument(name = "CapabilityServerImpl.teardown_peer", skip(self))]
-    fn teardown_peer(&self, peer: SentryPeerId) {
+    fn teardown_peer(&self, peer: devp2p::PeerIdHash) {
         let mut pipes = self.peer_pipes.write();
         let mut block_tracker = self.block_tracker.write();
         let mut valid_peers = self.valid_peers.write();
@@ -176,7 +176,7 @@ impl CapabilityServerImpl {
         }
     }
 
-    pub fn all_peers(&self) -> HashSet<SentryPeerId> {
+    pub fn all_peers(&self) -> HashSet<devp2p::PeerIdHash> {
         self.peer_pipes.read().keys().copied().collect()
     }
 
@@ -192,7 +192,7 @@ impl CapabilityServerImpl {
     #[instrument(name = "CapabilityServerImpl.handle_event", skip(self, event))]
     fn handle_event(
         &self,
-        peer: SentryPeerId,
+        peer: devp2p::PeerIdHash,
         event: InboundEvent,
     ) -> Result<Option<Message>, DisconnectReason> {
         match event {
@@ -266,6 +266,23 @@ impl CapabilityServerImpl {
 
         Ok(None)
     }
+
+    pub fn get_hash(&self, p2p_peer_id: PeerId) -> PeerIdHash {
+        let value = self.peer_id_cache.read().get(&p2p_peer_id).cloned();
+        match value {
+            Some(value) => value,
+            None => {
+                let hash = peer_id_hash_from_peer_id(p2p_peer_id);
+                self.peer_id_cache.write().insert(p2p_peer_id, hash);
+                hash
+            }
+        }
+        // .unwrap_or_else(|| {
+        //     let v = peer_id_hash_from_peer_id(p2p_peer_id);
+        //     self.peer_id_cache.write().insert(p2p_peer_id, v);
+        //     v
+        // })
+    }
 }
 
 #[async_trait]
@@ -273,10 +290,10 @@ impl CapabilityServer for CapabilityServerImpl {
     #[instrument(skip(self, p2p_peer_id), level = "debug", fields(peer=&*p2p_peer_id.to_string()))]
     fn on_peer_connect(
         &self,
-        p2p_peer_id: P2PPeerId,
+        p2p_peer_id: PeerId,
         caps: HashMap<CapabilityName, CapabilityVersion>,
     ) {
-        let peer: SentryPeerId = sentry_peer_id_from_p2p_peer_id(p2p_peer_id);
+        let peer = self.get_hash(p2p_peer_id);
         let first_events = if let Some(FullStatusData {
             status,
             fork_filter,
@@ -325,10 +342,9 @@ impl CapabilityServer for CapabilityServerImpl {
     }
 
     #[instrument(skip_all, level = "debug", fields(peer=&*p2p_peer_id.to_string(), event=&*event.to_string()))]
-    async fn on_peer_event(&self, p2p_peer_id: P2PPeerId, event: InboundEvent) {
+    async fn on_peer_event(&self, p2p_peer_id: PeerId, event: InboundEvent) {
         debug!("Received message");
-        let peer: SentryPeerId = sentry_peer_id_from_p2p_peer_id(p2p_peer_id);
-
+        let peer = self.get_hash(p2p_peer_id);
         if let Some(ev) = self.handle_event(peer, event).transpose() {
             let _ = self
                 .sender(peer)
@@ -344,8 +360,8 @@ impl CapabilityServer for CapabilityServerImpl {
         }
     }
 
-    async fn next(&self, p2p_peer_id: P2PPeerId) -> OutboundEvent {
-        let peer: SentryPeerId = sentry_peer_id_from_p2p_peer_id(p2p_peer_id);
+    async fn next(&self, p2p_peer_id: PeerId) -> OutboundEvent {
+        let peer = self.get_hash(p2p_peer_id);
         self.receiver(peer)
             .unwrap()
             .lock()
@@ -408,7 +424,6 @@ impl OptsDiscV4 {
             *secret_key,
             bootstrap_nodes,
             None,
-            true,
             self.listen_port,
         )
         .await?;
@@ -587,6 +602,7 @@ async fn main() -> anyhow::Result<()> {
         data_sender,
         peers_status_sender,
         no_new_peers: no_new_peers.clone(),
+        peer_id_cache: Arc::new(RwLock::new(HashMap::new())),
     });
 
     let swarm = Swarm::builder()
@@ -618,6 +634,8 @@ async fn main() -> anyhow::Result<()> {
         info!("Sentry gRPC server starting on {}", sentry_addr);
 
         Server::builder()
+            .initial_connection_window_size(FRAME_SIZE)
+            .initial_stream_window_size(FRAME_SIZE)
             .add_service(svc)
             .serve(sentry_addr)
             .await

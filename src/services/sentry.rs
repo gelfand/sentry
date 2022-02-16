@@ -1,4 +1,3 @@
-use crate::types::SentryPeerId;
 use crate::{eth::*, CapabilityServerImpl};
 use async_trait::async_trait;
 use devp2p::*;
@@ -14,10 +13,7 @@ use futures::{Stream, TryStreamExt};
 use num_traits::ToPrimitive;
 use secp256k1::rand::seq::IteratorRandom;
 use std::{collections::HashSet, convert::TryFrom, pin::Pin, sync::Arc};
-use tokio_stream::{
-    wrappers::{errors::BroadcastStreamRecvError, BroadcastStream},
-    StreamExt,
-};
+use tokio_stream::wrappers::{errors::BroadcastStreamRecvError, BroadcastStream};
 use tonic::Response;
 use tracing::*;
 
@@ -45,7 +41,7 @@ impl SentryService {
     ) -> SentPeers
     where
         F: FnOnce(&CapabilityServerImpl) -> IT,
-        IT: IntoIterator<Item = SentryPeerId>,
+        IT: IntoIterator<Item = PeerIdHash>,
     {
         let result = self.try_send_by_predicate(request, pred).await;
         result.unwrap_or_else(|error| {
@@ -64,7 +60,7 @@ impl SentryService {
     ) -> anyhow::Result<SentPeers>
     where
         F: FnOnce(&CapabilityServerImpl) -> IT,
-        IT: IntoIterator<Item = SentryPeerId>,
+        IT: IntoIterator<Item = PeerIdHash>,
     {
         let request = request.ok_or_else(|| anyhow::anyhow!("empty request"))?;
 
@@ -98,19 +94,19 @@ impl SentryService {
         let mut peers = Vec::new();
         for task in join_handler {
             match task.await {
-                Ok(peer) => peers.push(peer.unwrap().into()),
+                Ok(peer) => peers.push(if let Ok(peer) = peer {
+                    peer
+                } else {
+                    continue;
+                }),
                 _ => continue,
             }
         }
 
-        Ok(SentPeers { peers })
+        Ok(SentPeers { peers: Vec::new() })
     }
 
-    async fn send_message(
-        &self,
-        message: Message,
-        peer: SentryPeerId,
-    ) -> anyhow::Result<SentryPeerId> {
+    async fn send_message(&self, message: Message, peer: PeerIdHash) -> anyhow::Result<PeerIdHash> {
         let sender = self
             .capability_server
             .sender(peer)
@@ -300,12 +296,13 @@ impl Sentry for SentryService {
             .collect::<HashSet<i32>>();
 
         let receiver = self.capability_server.data_sender.subscribe();
-        let stream = BroadcastStream::new(receiver)
-            .filter_map(|res| res.ok()) // ignore BroadcastStreamRecvError
-            .filter(move |message: &InboundMessage| {
-                ids_set.is_empty() || ids_set.contains(&message.id)
-            })
-            .map(Ok);
+        let stream = tokio_stream::StreamExt::map(
+            tokio_stream::StreamExt::filter(
+                tokio_stream::StreamExt::filter_map(BroadcastStream::new(receiver), |res| res.ok()),
+                move |message: &InboundMessage| ids_set.is_empty() || ids_set.contains(&message.id),
+            ),
+            Ok,
+        );
 
         Ok(Response::new(Box::pin(stream)))
     }

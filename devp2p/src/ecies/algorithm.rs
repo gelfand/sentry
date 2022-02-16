@@ -232,7 +232,7 @@ impl ECIES {
 
         let decrypted_data = encrypted_data;
 
-        let mut decryptor = Aes128Ctr::new(enc_key.as_ref().into(), (&*iv).into());
+        let mut decryptor = Aes128Ctr::new(enc_key.as_ref().into(), (*iv).into());
         decryptor.apply_keystream(decrypted_data);
 
         Ok(decrypted_data)
